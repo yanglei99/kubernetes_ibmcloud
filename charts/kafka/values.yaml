@@ -1,0 +1,55 @@
+#------------------------------------------------------------------------------
+# Kafka:
+#------------------------------------------------------------------------------
+
+Replicas: 3
+Image: "solsson/kafka"
+ImageTag: "0.11.0.0"
+ImagePullPolicy: "IfNotPresent"
+resources: {}
+  # limits:
+  #   cpu: 200m
+  #   memory: 1536Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 1024Mi
+Storage: "2Gi"
+StorageClass: ibmc-file-bronze
+DataDirectory: "/opt/kafka/data"
+
+#------------------------------------------------------------------------------
+# Zookeeper:
+#------------------------------------------------------------------------------
+
+zookeeper:
+  servers: 3
+  resources:
+    requests:
+      cpu: 500m
+      memory: 2Gi
+    limits:
+      cpu: 1
+      memory: 4Gi
+  heap: "2G"
+  storage: "20Gi"
+  storageClass: ibmc-file-bronze
+  serverPort: 2888
+  leaderElectionPort: 3888
+  clientPort: 2181
+  imagePullPolicy: "Always"
+  tickTimeMs: 2000
+  initTicks: 10
+  syncTicks: 5
+  clientCnxns: 60
+  snapRetain: 3
+  purgeHours: 1
+  probeInitialDelaySeconds: 15
+  probeTimeoutSeconds: 5
+  antiAffinity: "hard"
+  logLevel: "INFO"
+  security:
+    enabled: false
+    runAsUser: 1000
+    fsGroup: 1000
+
+  

@@ -5,8 +5,8 @@ reference [Zookeeper chart](https://github.com/kubernetes/charts/tree/master/inc
 
 With the following [changes](values.yaml)
 
-* revise `storageClass` to what `kubectl get storageclasses` returns, e.g. `storageClass: ibmc-file-bronze`. 
-* you can also pre-create the persistenceVolumeClaim, after changing `name` in the [script](../ibm-pvc.yaml).
+* [option] revise `storageClass` to what `kubectl get storageclasses` returns, e.g. `ibmc-file-bronze` is `default`
+* [Option] you can also pre-create the persistenceVolumeClaim, after changing `name` in the [script](../ibm-pvc.yaml).
 
 
 ### Verified 
@@ -29,5 +29,3 @@ With the following [changes](values.yaml)
 	
 	
 ### Known problem
-
-* Zookeeper cluster can not be started with default 0.3.1. Work around by changing dependency to 0.4.2

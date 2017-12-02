@@ -7,4 +7,7 @@
 
 * [Zookeeper](charts/zk/README.md). Provision Zookeeper cluster.
 * [Kafka](charts/kafka/README.md). Provision HA Kafka cluster with ZK.
-* [Spark](spark/README.md). Spark on k8s
+
+## Workload
+
+* [Spark](spark/README.md)

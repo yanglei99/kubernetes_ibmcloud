@@ -16,7 +16,7 @@ reference [Running Spark on K8s](https://apache-spark-on-k8s.github.io/userdocs/
 
 Due to a [DNS name not verified against API Server within driver pod issue](https://github.com/apache-spark-on-k8s/spark/issues/558#issuecomment-348671507), need to rebuild images with changes. 
 
-[Prebuild images](https://hub.docker.com/r/yanglei99)
+[Pre-built images](https://hub.docker.com/r/yanglei99)
 
 #### Build steps
 
@@ -69,7 +69,7 @@ Need to change away from `declare -A path` when running build on OSX.
 
 #### Spark-submit configuration
 
-Add `--conf spark.kubernetes.driverEnv.KUBERNETES_MASTER=<MASTER URL>` to by pass DNS host name not verified issue.
+Add `--conf spark.kubernetes.driverEnv.KUBERNETES_MASTER=<MASTER URL>` to bypass DNS host name not verified issue.
 
 
 ### To verify
@@ -96,6 +96,7 @@ Note:
 #### Kafka Streaming Example
 
 reference [kafka chart](../charts/kafka/README.md)
+
 reference [Spark Kafka Streaming](https://spark.apache.org/docs/2.2.0/streaming-kafka-0-8-integration.html)
 
 	bin/spark-submit --deploy-mode cluster --master k8s://http://localhost:8001  --kubernetes-namespace default --conf spark.app.name=myKafkaApp --conf spark.kubernetes.driver.docker.image=YOUR_ACCT/spark-driver-py:v2.2.0-kubernetes-0.5.0 --conf spark.kubernetes.executor.docker.image=YOUR_ACCT/spark-executor-py:v2.2.0-kubernetes-0.5.0 --conf spark.kubernetes.initcontainer.docker.image=YOUR_ACCT/spark-init:v2.2.0-kubernetes-0.5.0 --jars local:///opt/spark/examples/jars/spark-examples_2.11-2.2.0-k8s-0.5.0.jar  --conf spark.kubernetes.driverEnv.KUBERNETES_MASTER=https://MASTER_IP:MASTER_PORT  --packages org.apache.spark:spark-streaming-kafka-0-8_2.11:2.2.0 --conf spark.kubernetes.resourceStagingServer.uri=http://YOUR_WORKER_NODE:31000  local:///opt/spark/examples/src/main/python/streaming/direct_kafka_wordcount.py my-kafka-kafka-headless:9092 mytopic

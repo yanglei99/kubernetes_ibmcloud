@@ -10,7 +10,7 @@ With the following [changes](values.yaml)
 * [Option] you can also pre-create the persistenceVolumeClaim, after changing `name` in the [script](../ibm-pvc.yaml).
 
 
-###Verified 
+### Verified 
 
 * Kubernetes 1.7.4
 * Kafka Chart 0.2.2

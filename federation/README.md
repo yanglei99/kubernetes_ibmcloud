@@ -4,7 +4,7 @@
 reference [Kubernetes Cluster Federation](https://kubernetes.io/docs/tasks/federation/set-up-cluster-federation-kubefed/)
 
 
-###Verified 
+### Verified 
 
 * Kubernetes 1.7.4
 * ETCD Chart 0.5.1: image v0.6.1

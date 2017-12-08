@@ -9,7 +9,7 @@ With the following changes:
 * [coredns-provider.conf](coredns-provider.conf): remove `coredns-endpoints`
 
 
-###Verified 
+### Verified 
 
 * Kubernetes 1.7.4
 * ETCD Chart 0.5.1: image v0.6.1

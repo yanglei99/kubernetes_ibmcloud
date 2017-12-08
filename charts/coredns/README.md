@@ -1,12 +1,11 @@
-## CoreDNS IBM Container Service
+## CoreDNS on IBM Container Service
 
 
 reference [Deploying CoreDNS and etcd charts](https://kubernetes.io/docs/tasks/federation/set-up-coredns-provider-federation/)
 
-With the following changes:
+With the following key changes:
 
 * [values.yaml](values.yaml): `serviceProtocol: "TCP"`
-* [coredns-provider.conf](coredns-provider.conf): remove `coredns-endpoints`
 
 
 ### Verified 
@@ -15,6 +14,7 @@ With the following changes:
 * ETCD Chart 0.5.1: image v0.6.1
 * CoreDNS Chart: image  011
 
+Also verified on ICP
 
 ### Install ETCD Chart
 

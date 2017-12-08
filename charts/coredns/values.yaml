@@ -1,0 +1,11 @@
+isClusterService: false
+serviceType: "LoadBalancer"
+serviceProtocol: "TCP"
+middleware:
+  kubernetes:
+    enabled: false
+  etcd:
+    enabled: true
+    zones:
+    - "example.com."
+    endpoint: "http://etcd-cluster.default:2379"

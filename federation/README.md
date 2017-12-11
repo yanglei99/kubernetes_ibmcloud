@@ -31,7 +31,7 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	
 ##### on ICP
 
-	kubefed init fellowship-icp --host-cluster-context=mycluster.icp-context --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/icp-coredns-provider.conf" --etcd-persistent-storage=false --api-server-advertise-address=ICP_HOST --api-server-service-type='NodePort'
+	kubefed init fellowship --host-cluster-context=mycluster-icp --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/icp-coredns-provider.conf" --etcd-persistent-storage=false --api-server-advertise-address=ICP_HOST --api-server-service-type='NodePort'
 	
 	
 #### Make multiple contexts visible to kubectl
@@ -52,7 +52,7 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	
 #### Add/Remove cluster to federation
 
-	# switch context
+	# switch context.
 	kubectl config use-context fellowship
 
 	kubefed join mycluster-1 --host-cluster-context=mycluster-1
@@ -64,16 +64,19 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	
 	# remove cluster from federation
 	kubefed unjoin mycluster-2 --host-cluster-context=mycluster-1
-	
-#### Create `default` namespace
+
+Note: revise `host-cluster-context` to your host cluster context, e.g. `mycluster-icp`
+ 	
+ 	
+#### Create `default` namespace in federation context
 
 	kubectl get namespace --context=fellowship
 	kubectl create namespace default --context=fellowship
 
 	
-#### Remove federation
+#### Remove federation 
 
-	kubectl delete ns federation-system --context=YOUR_FELLOWSHIP_CONTEXT
+	kubectl delete ns federation-system --context=fellowship
 	
 	
 ### Placement scenarios
@@ -93,6 +96,8 @@ Use [test-federation.sh](test-federation.sh) to list pods and services from each
 	kubectl create -f policy-engine-deployment.yaml
 	kubectl --context=fellowship create namespace kube-federation-scheduling-policy
 	kubectl --context=fellowship -n kube-federation-scheduling-policy create configmap scheduling-policy --from-file=policy.rego
+
+Note: you can revise  `use-context` to your host cluster context, e.g. `mycluster-icp`
 
 ##### Test the placement policy
 
@@ -114,6 +119,7 @@ Use [test-federation.sh](test-federation.sh) to list pods and services from each
 	# ReplicaSet, Service, pods are created in each federated cluster
 	kubectl --context=mycluster-1 get rs,pod,svc -l app=nginx
 	kubectl --context=mycluster-2 get rs,pod,svc -l app=nginx
+	kubectl --context=mycluster-icp get rs,pod,svc -l app=nginx
 	
 	# Describe the service endpoint
 	kubectl --context=fellowship describe services nginx

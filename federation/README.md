@@ -49,7 +49,7 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	kubectl config get-contexts
 	
 	
-#### Add cluster to federation
+#### Add/Remove cluster to federation
 
 	# switch context
 	kubectl config use-context YOUR_FELLOWSHIP_CONTEXT
@@ -60,12 +60,20 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 
 	# display clusters of a federation
 	kubectl --context= YOUR_FELLOWSHIP_CONTEXT get clusters
-
+	
+	# remove cluster from federation
+	kubefed unjoin YOUR_CONTEXT --host-cluster-context=YOUR_CONTROL_PLANE_CONTEXT
+	
 #### Create `default` namespace
 
 	kubectl get namespace --context=YOUR_FELLOWSHIP_CONTEXT
 	kubectl create namespace default --context=YOUR_FELLOWSHIP_CONTEXT
-	
+
+#### Remove federation
+
+	kubectl delete ns federation-system --context=YOUR_FELLOWSHIP_CONTEXT
+
+
 ### Known problem
 
 

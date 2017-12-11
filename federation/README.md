@@ -48,36 +48,27 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	# display all context available for cluster join	
 	kubectl config get-contexts
 	
+	
 #### Add cluster to federation
 
-	
-##### with Container Service Control Plane
-
 	# switch context
-	kubectl config use-context fellowship
+	kubectl config use-context YOUR_FELLOWSHIP_CONTEXT
 
-	kubefed join mycluster-1 --host-cluster-context=mycluster-1 
-	kubefed join mycluster-2 --host-cluster-context=mycluster-1 
-	kubefed join mycluster-icp --host-cluster-context=mycluster-1 
+	kubefed join mycluster-1 --host-cluster-context=YOUR_CONTROL_PLANE_CONTEXT
+	kubefed join mycluster-2 --host-cluster-context=YOUR_CONTROL_PLANE_CONTEXT
+	kubefed join mycluster-icp --host-cluster-context=YOUR_CONTROL_PLANE_CONTEXT
 
 	# display clusters of a federation
-	kubectl --context=fellowship get clusters
+	kubectl --context= YOUR_FELLOWSHIP_CONTEXT get clusters
 
-#####  with ICP Control Plane
-	
-	# switch context
-	kubectl config use-context fellowship-icp
+#### Create `default` namespace
 
-	kubefed join mycluster-icp --host-cluster-context=mycluster-icp
-	kubefed join mycluster-1 --host-cluster-context=mycluster-icp
-	kubefed join mycluster-2 --host-cluster-context=mycluster-icp
-
-	# display clusters of a federation
-	kubectl --context=fellowship get clusters
-
+	kubectl get namespace --context=YOUR_FELLOWSHIP_CONTEXT
+	kubectl create namespace default --context=YOUR_FELLOWSHIP_CONTEXT
 	
 ### Known problem
 
 
 * kubefed command may hit `unable to read certificate-authority xxx.pem for mycluster-fed due to open xxx.pem: no such file or directory`. Copy the pem to execution directory work around the issue
 * ICP `kubedef init` hit hung situation withoutu the extra settings
+* Joining cluster name can not have `.` in the name. You can `kubeded join` a new cluster name, while using `--cluster-context` to point to the original context.

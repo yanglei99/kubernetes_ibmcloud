@@ -40,8 +40,7 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	
 	export KUBECONFIG=~/.bluemix/plugins/container-service/clusters/mycluster-1/xxx-mycluster-1.yml:~/.bluemix/plugins/container-service/clusters/mycluster-1/xxx-mycluster-1.yml:~/.kube/config
 	
-	# for ICP Cluster, if you manually create the cluster context from `Configure Client`, the current context's config file will be updated
-	e.g.
+	# for ICP Cluster, if you manually create the cluster context from `Configure Client`, the current context's config file will be updated. e.g.
 	kubectl config set-cluster mycluster-icp --server=https://ICP_HOST:PORT --insecure-skip-tls-verify=true
 	kubectl config set-context mycluster-icp --cluster=mycluster-icp
 	kubectl config set-credentials mycluster-icp-user --token=TOKEN
@@ -53,7 +52,6 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	
 #### Add/Remove cluster to federation
 
-	e.g.
 	# switch context
 	kubectl config use-context fellowship
 
@@ -65,7 +63,7 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	kubectl --context=fellowship get clusters
 	
 	# remove cluster from federation
-	kubefed unjoinmycluster-2 --host-cluster-context=mycluster-1
+	kubefed unjoin mycluster-2 --host-cluster-context=mycluster-1
 	
 #### Create `default` namespace
 
@@ -82,11 +80,10 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 
 Use [test-federation.sh](test-federation.sh) to list pods and services from each federated cluster.
 
-#### Placement policies through label
+#### Placement policy using label
 
 [reference](https://kubernetes.io/docs/tasks/federation/set-up-placement-policies-federation). Need to change `kube-federation-scheduling-policy.yaml` with the correct secret name, e.g `fellowship` instead of `federation`
 
-	e.g. 
 	kubectl config use-context mycluser-1
 	
 	kubectl create -f scheduling-policy-admission.yaml
@@ -110,7 +107,6 @@ Use [test-federation.sh](test-federation.sh) to list pods and services from each
 
 [reference](https://kubernetes.io/docs/tasks/federation/federation-service-discovery/) or [more in detail](https://github.com/kelseyhightower/kubernetes-cluster-federation/blob/master/labs/07-federated-nginx-service.md)
 
-	e.g.
 	# ReplicaSet and Service are created in federation context 
 	kubectl --context=fellowship create -f nginx.yaml
 	kubectl --context=fellowship get rs -l app=nginx 

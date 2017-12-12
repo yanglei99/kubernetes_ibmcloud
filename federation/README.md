@@ -85,15 +85,36 @@ Use [test-federation.sh](test-federation.sh) to list pods and services from each
 
 #### Placement policy using label
 
-[reference](https://kubernetes.io/docs/tasks/federation/set-up-placement-policies-federation). Need to change `kube-federation-scheduling-policy.yaml` with the correct secret name, e.g `fellowship` instead of `federation`
+[reference](https://kubernetes.io/docs/tasks/federation/set-up-placement-policies-federation). Need to change secret name in [policy-engine-deployment.yaml](policy-engine-deployment.yaml) to the correct one, e.g `fellowship` instead of `federation`
 
-	kubectl config use-context mycluser-1
+    # Switch Context
+	kubectl config use-context mycluster-1
 	
+	# Create and config schedule policy 
 	kubectl create -f scheduling-policy-admission.yaml
 	kubectl -n federation-system edit deployment fellowship-apiserver
+		# Change 1 
+		from
+			- --admission-control=NamespaceLifecycle
+		to
+			- --admission-control=SchedulingPolicy
+			- --admission-control-config-file=/etc/kubernetes/admission/config.yml
+
+		# Change 2
+		add under volumes
+			- name: admission-config
+			  configMap:
+			    name: admission
+
+		# Change 3
+		add under volumeMounts
+			- name: admission-config
+			  mountPath: /etc/kubernetes/admission
 	
+	# Deploy policy engine
 	kubectl create -f policy-engine-service.yaml
 	kubectl create -f policy-engine-deployment.yaml
+	
 	kubectl --context=fellowship create namespace kube-federation-scheduling-policy
 	kubectl --context=fellowship -n kube-federation-scheduling-policy create configmap scheduling-policy --from-file=policy.rego
 
@@ -135,4 +156,5 @@ Note: you can revise  `use-context` to your host cluster context, e.g. `mycluste
 * ICP `kubedef init` hit hung situation withoutu the extra settings
 * Joining cluster name can not have `.` in the name. You can `kubeded join` a new cluster name, while using `--cluster-context` to point to the original context.
 * To clean up properly, you may need to issue `kubectl delete ns federation-system --context=` against all context involved in the federation
+* [Investigate](ICP as Control Plane placement policy not working)
 

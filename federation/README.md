@@ -5,9 +5,7 @@ reference [Kubernetes Cluster Federation](https://kubernetes.io/docs/tasks/feder
 
 with the following key changes:
 
-* Control Plane on Container Service [coredns-provider.conf](coredns-provider.conf): remove `coredns-endpoints`
-* Control Plane on ICP [icp-coredns-provider.conf](icp-coredns-provider.conf): use the endpoints from `coredns-coredns`
-
+* [coredns-provider.conf](coredns-provider.conf): use endpoints of `coredns-coredns`
 
 ### Verified 
 
@@ -31,9 +29,16 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	
 ##### on ICP
 
-	kubefed init fellowship --host-cluster-context=mycluster-icp --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/icp-coredns-provider.conf" --etcd-persistent-storage=false --api-server-advertise-address=ICP_HOST --api-server-service-type='NodePort'
+	kubefed init fellowship --host-cluster-context=mycluster-icp --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/coredns-provider.conf" --etcd-persistent-storage=false --api-server-advertise-address=ICP_HOST --api-server-service-type='NodePort'
 	
 	
+####  Make sure CoreDNS server in nameserver resolv.conf chain
+
+check `--server=/example.com./COREDNS_IP#53` is defined in `kube-dns-amd64`
+
+	kubectl --context mycluster-kafka edit deploy kube-dns-amd64 -n kube-system
+		
+
 #### Make multiple contexts visible to kubectl
 
 	# when you have the cluster config yml. e.g. downloaded from IBM Container Service Cluster
@@ -79,13 +84,13 @@ Note: revise `host-cluster-context` to your host cluster context, e.g. `mycluste
 	kubectl delete ns federation-system --context=fellowship
 	
 	
-### Placement scenarios
+### Use case scenarios
 
 Use [test-federation.sh](test-federation.sh) to list pods and services from each federated cluster.
 
-#### Placement policy using label
+#### Placement through policy using label
 
-[reference](https://kubernetes.io/docs/tasks/federation/set-up-placement-policies-federation). Need to change secret name in [policy-engine-deployment.yaml](policy-engine-deployment.yaml) to the correct one, e.g `fellowship` instead of `federation`
+[Reference](https://kubernetes.io/docs/tasks/federation/set-up-placement-policies-federation). Need to change secret name in [policy-engine-deployment.yaml](policy-engine-deployment.yaml) to the correct one, e.g `fellowship` instead of `federation`
 
     # Switch Context
 	kubectl config use-context mycluster-1
@@ -118,7 +123,7 @@ Use [test-federation.sh](test-federation.sh) to list pods and services from each
 	kubectl --context=fellowship create namespace kube-federation-scheduling-policy
 	kubectl --context=fellowship -n kube-federation-scheduling-policy create configmap scheduling-policy --from-file=policy.rego
 
-Note: you can revise  `use-context` to your host cluster context, e.g. `mycluster-icp`
+Note: you can revise `use-context` to your host cluster context, e.g. `mycluster-icp`
 
 ##### Test the placement policy
 
@@ -129,9 +134,18 @@ Note: you can revise  `use-context` to your host cluster context, e.g. `mycluste
 	kubectl --context=fellowship get rs nginx-pci -o jsonpath='{.metadata.annotations}'
 
 
-#### Even distribution
+#### Default placement of even distribution
+
+One every federated context:
+
+	kubectl --context=mycluster-1 run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
+	
+		host YOUR_SERVICE.default.fellowship
+
+##### Example Federated NginX
 
 [reference](https://kubernetes.io/docs/tasks/federation/federation-service-discovery/) or [more in detail](https://github.com/kelseyhightower/kubernetes-cluster-federation/blob/master/labs/07-federated-nginx-service.md)
+
 
 	# ReplicaSet and Service are created in federation context 
 	kubectl --context=fellowship create -f nginx.yaml
@@ -148,7 +162,10 @@ Note: you can revise  `use-context` to your host cluster context, e.g. `mycluste
 	# clean up
 	kubectl --context=fellowship delete rs,svc -l app=nginx 
 	
+### TODO
 
+* Cross-cluster service discovery
+   
 ### Known problem
 
 

@@ -31,13 +31,6 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 
 	kubefed init fellowship --host-cluster-context=mycluster-icp --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/coredns-provider.conf" --etcd-persistent-storage=false --api-server-advertise-address=ICP_HOST --api-server-service-type='NodePort'
 	
-	
-####  Make sure CoreDNS server in nameserver resolv.conf chain
-
-check `--server=/example.com./COREDNS_IP#53` is defined in `kube-dns-amd64`
-
-	kubectl --context mycluster-kafka edit deploy kube-dns-amd64 -n kube-system
-		
 
 #### Make multiple contexts visible to kubectl
 
@@ -136,36 +129,41 @@ Note: you can revise `use-context` to your host cluster context, e.g. `mycluster
 
 #### Default placement of even distribution
 
-One every federated context:
-
-	kubectl --context=mycluster-1 run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
-	
-		host YOUR_SERVICE.default.fellowship
-
-##### Example Federated NginX
-
 [reference](https://kubernetes.io/docs/tasks/federation/federation-service-discovery/) or [more in detail](https://github.com/kelseyhightower/kubernetes-cluster-federation/blob/master/labs/07-federated-nginx-service.md)
-
 
 	# ReplicaSet and Service are created in federation context 
 	kubectl --context=fellowship create -f nginx.yaml
-	kubectl --context=fellowship get rs -l app=nginx 
 	
-	# ReplicaSet, Service, pods are created in each federated cluster
-	kubectl --context=mycluster-1 get rs,pod,svc -l app=nginx
-	kubectl --context=mycluster-2 get rs,pod,svc -l app=nginx
-	kubectl --context=mycluster-icp get rs,pod,svc -l app=nginx
-	
-	# Describe the service endpoint
+	# Describe the service
 	kubectl --context=fellowship describe services nginx
-	
+
 	# clean up
 	kubectl --context=fellowship delete rs,svc -l app=nginx 
-	
-### TODO
 
-* Cross-cluster service discovery
-   
+
+#### Cross-Cluster Service Discovery
+
+One every federated cluster:
+
+	kubectl --context=mycluster-1 run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
+	
+		# Use the federated DNS name
+		
+		host nginx.default.fellowship
+	
+		# re-label cluster
+		kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us  --overwrite --context mycluster-1 
+		kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=east --overwrite --context mycluster-1
+
+		kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us   --overwrite --context mycluster2
+		kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=west  --overwrite --context mycluster2
+		
+		# Use the cluster NDS name
+		host nginx.default.fellowship.svc.east.us
+		host nginx.default.fellowship.svc.west.us
+
+#### Micro-Service on Federation
+
 ### Known problem
 
 

@@ -9,7 +9,7 @@ with the following key changes:
 
 ### Verified 
 
-* Container Service: Kubernetes 1.7.4, Federation API Server 1.8.4
+* Container Service: Kubernetes 1.7.4, Federation 1.8.4
 * ETCD Chart 0.5.1: image v0.6.1
 * CoreDNS Chart: image  011
 
@@ -26,7 +26,7 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 ##### on IBM Container Service
 	
 	kubefed init fellowship --host-cluster-context=mycluster-1 --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/coredns-provider.conf"
-	
+		
 ##### on ICP
 
 	kubefed init fellowship --host-cluster-context=mycluster-icp --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/coredns-provider.conf" --etcd-persistent-storage=false --api-server-advertise-address=ICP_HOST --api-server-service-type='NodePort'
@@ -56,6 +56,11 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	kubefed join mycluster-1 --host-cluster-context=mycluster-1
 	kubefed join mycluster-2 --host-cluster-context=mycluster-1
 	kubefed join mycluster-icp --host-cluster-context=mycluster-1
+
+	# update kube-dns with sub-domain "example.com" on every federated cluster
+	kubectl apply -f cm-kube-dns.yaml --context=mycluster-1
+	kubectl apply -f cm-kube-dns.yaml --context=mycluster-2
+	kubectl apply -f cm-kube-dns.yaml --context=mycluster-icp
 
 	# display clusters of a federation
 	kubectl --context=fellowship get clusters
@@ -159,10 +164,12 @@ One every federated cluster:
 		kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=west  --overwrite --context mycluster2
 		
 		# Use the cluster NDS name
-		host nginx.default.fellowship.svc.east.us
-		host nginx.default.fellowship.svc.west.us
+		host nginx.default.fellowship.svc.east.us.example.com
+		host nginx.default.fellowship.svc.west.us.example.com
 
 #### Micro-Service on Federation
+
+Reference [Acmeair MicroService](https://github.com/yanglei99/acmeair-nodejs/blob/master/document/k8s/acmeair-ms-fed.yaml)
 
 ### Known problem
 
@@ -171,5 +178,6 @@ One every federated cluster:
 * ICP `kubedef init` hit hung situation withoutu the extra settings
 * Joining cluster name can not have `.` in the name. You can `kubeded join` a new cluster name, while using `--cluster-context` to point to the original context.
 * To clean up properly, you may need to issue `kubectl delete ns federation-system --context=` against all context involved in the federation
-* [Investigate](ICP as Control Plane placement policy not working)
+* Investigate, ICP as Control Plane placement policy not working
+* Investigate, cross cluster DNS name not working
 

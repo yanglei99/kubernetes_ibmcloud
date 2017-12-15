@@ -10,7 +10,7 @@ With the following key changes:
 
 ### Verified 
 
-* Kubernetes 1.7.4
+* Kubernetes: v1.7.4, v1.8.4
 * ETCD Chart 0.5.1: image v0.6.1
 * CoreDNS Chart: image  011
 

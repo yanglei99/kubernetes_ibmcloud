@@ -8,4 +8,4 @@ middleware:
     enabled: true
     zones:
     - "example.com."
-    endpoint: "http://etcd-cluster.default:2379"
+    endpoint: "http://etcd-cluster-client.default:2379"

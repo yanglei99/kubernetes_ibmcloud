@@ -9,7 +9,7 @@ with the following key changes:
 
 ### Verified 
 
-* Container Service: Kubernetes 1.7.4, Federation 1.8.4
+* Container Service: Kubernetes 1.8.4, Federation 1.8.4
 * ETCD Chart 0.5.1: image v0.6.1
 * CoreDNS Chart: image  011
 
@@ -19,17 +19,23 @@ Also verified on ICP
 
 #### Deploy CoreDNS with etcd
 
+Select one of clusters as federation host. 
+
 reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/README.md)
 
 #### Deploy Federation Control Plane on IBM Cloud
 
+Update [coredns-provider.conf](coredns-provider.conf) with the coredns ingress IP.
+
+	kubectl get svc --namespace default coredns-coredns -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+
 ##### on IBM Container Service
 	
-	kubefed init fellowship --host-cluster-context=mycluster-1 --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/coredns-provider.conf"
+	kubefed init fellowship --host-cluster-context=mycluster-1 --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="coredns-provider.conf"
 		
 ##### on ICP
 
-	kubefed init fellowship --host-cluster-context=mycluster-icp --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="$PWD/coredns-provider.conf" --etcd-persistent-storage=false --api-server-advertise-address=ICP_HOST --api-server-service-type='NodePort'
+	kubefed init fellowship --host-cluster-context=mycluster-icp --dns-provider="coredns" --dns-zone-name="example.com." --dns-provider-config="coredns-provider.conf" --etcd-persistent-storage=false --api-server-advertise-address=ICP_HOST --api-server-service-type='NodePort'
 	
 
 #### Make multiple contexts visible to kubectl
@@ -50,6 +56,8 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	
 #### Add/Remove cluster to federation
 
+Use your `host-cluster-context`. e.g. e.g. `mycluster-icp`
+
 	# switch context.
 	kubectl config use-context fellowship
 
@@ -57,21 +65,20 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 	kubefed join mycluster-2 --host-cluster-context=mycluster-1
 	kubefed join mycluster-icp --host-cluster-context=mycluster-1
 
-	# update kube-dns with sub-domain "example.com" on every federated cluster
-	kubectl apply -f cm-kube-dns.yaml --context=mycluster-1
-	kubectl apply -f cm-kube-dns.yaml --context=mycluster-2
-	kubectl apply -f cm-kube-dns.yaml --context=mycluster-icp
-
 	# display clusters of a federation
 	kubectl --context=fellowship get clusters
 	
 	# remove cluster from federation
 	kubefed unjoin mycluster-2 --host-cluster-context=mycluster-1
 
-Note: revise `host-cluster-context` to your host cluster context, e.g. `mycluster-icp`
+Note: 
+
+* `kube-dns` configMap needs to contain sub-domain `example.com` on every federated cluster. revise [cm-kube-dns.yaml](cm-kube-dns.yaml) with the coredns ingress IP. and restart kube-dns after the change
+
+	kubectl apply -f cm-kube-dns.yaml --context=mycluster-1
+	...
  	
- 	
-#### Create `default` namespace in federation context
+#### Create `default` namespace in federation context as needed
 
 	kubectl get namespace --context=fellowship
 	kubectl create namespace default --context=fellowship
@@ -79,7 +86,9 @@ Note: revise `host-cluster-context` to your host cluster context, e.g. `mycluste
 	
 #### Remove federation 
 
-	kubectl delete ns federation-system --context=fellowship
+On every federated cluster
+
+	kubectl delete ns federation-system --context=YOUR_CONTEXT
 	
 	
 ### Use case scenarios

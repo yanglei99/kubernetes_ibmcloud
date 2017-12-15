@@ -6,6 +6,10 @@ reference [Kubernetes Cluster Federation](https://kubernetes.io/docs/tasks/feder
 with the following key changes:
 
 * [coredns-provider.conf](coredns-provider.conf): use endpoints of `coredns-coredns`
+* [coredns-provider.conf](coredns-provider.conf): use the coredns ingress IP.
+
+* [cm-kube-dns.yaml](cm-kube-dns.yaml): make sure each federated cluster has `kube-dns` configMap with sub-domain `example.com`. use coredns ingress IP and restart kube-dns after the change.
+
 
 ### Verified 
 
@@ -24,8 +28,6 @@ Select one of clusters as federation host.
 reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/README.md)
 
 #### Deploy Federation Control Plane on IBM Cloud
-
-Update [coredns-provider.conf](coredns-provider.conf) with the coredns ingress IP.
 
 	kubectl get svc --namespace default coredns-coredns -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 
@@ -56,7 +58,7 @@ Update [coredns-provider.conf](coredns-provider.conf) with the coredns ingress I
 	
 #### Add/Remove cluster to federation
 
-Use your `host-cluster-context`. e.g. e.g. `mycluster-icp`
+Use your `host-cluster-context`. e.g. `mycluster-icp`
 
 	# switch context.
 	kubectl config use-context fellowship
@@ -68,15 +70,14 @@ Use your `host-cluster-context`. e.g. e.g. `mycluster-icp`
 	# display clusters of a federation
 	kubectl --context=fellowship get clusters
 	
+	# Optional update kube-dns ConfigMap as needed
+	kubectl apply -f cm-kube-dns.yaml --context=mycluster-1
+	kubectl apply -f cm-kube-dns.yaml --context=mycluster-2
+	kubectl apply -f cm-kube-dns.yaml --context=mycluster-icp
+	
 	# remove cluster from federation
 	kubefed unjoin mycluster-2 --host-cluster-context=mycluster-1
 
-Note: 
-
-* `kube-dns` configMap needs to contain sub-domain `example.com` on every federated cluster. revise [cm-kube-dns.yaml](cm-kube-dns.yaml) with the coredns ingress IP. and restart kube-dns after the change
-
-	kubectl apply -f cm-kube-dns.yaml --context=mycluster-1
-	...
  	
 #### Create `default` namespace in federation context as needed
 
@@ -157,7 +158,7 @@ Note: you can revise `use-context` to your host cluster context, e.g. `mycluster
 
 #### Cross-Cluster Service Discovery
 
-One every federated cluster:
+On every federated cluster:
 
 	kubectl --context=mycluster-1 run -it --rm --restart=Never --image=infoblox/dnstools:latest dnstools
 	
@@ -188,5 +189,5 @@ Reference [Acmeair MicroService](https://github.com/yanglei99/acmeair-nodejs/blo
 * Joining cluster name can not have `.` in the name. You can `kubeded join` a new cluster name, while using `--cluster-context` to point to the original context.
 * To clean up properly, you may need to issue `kubectl delete ns federation-system --context=` against all context involved in the federation
 * Investigate, ICP as Control Plane placement policy not working
-* Investigate, cross cluster DNS name not working
+* Investigate, cross cluster DNS name lookup not working
 

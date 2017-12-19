@@ -5,4 +5,4 @@ metadata:
   namespace: kube-system
 data:
   stubDomains: |
-    {"example.com": ["YOUR_IP"]}
+    {"example.com": ["COREDNS_IP:53"]}

@@ -5,17 +5,16 @@ reference [Kubernetes Cluster Federation](https://kubernetes.io/docs/tasks/feder
 
 with the following key changes:
 
-* [coredns-provider.conf](coredns-provider.conf): use endpoints of `coredns-coredns`
-* [coredns-provider.conf](coredns-provider.conf): use the coredns ingress IP.
+* [coredns-provider.conf](coredns-provider.conf): use the coredns external IP.
 
-* [cm-kube-dns.yaml](cm-kube-dns.yaml): make sure each federated cluster has `kube-dns` configMap with sub-domain `example.com`. use coredns ingress IP and restart kube-dns after the change.
+* [cm-kube-dns.yaml](cm-kube-dns.yaml): make sure each federated cluster has `kube-dns` configMap with sub-domain `example.com` and coredns external IP.
 
 
 ### Verified 
 
 * Container Service: Kubernetes 1.8.4, Federation 1.8.4
-* ETCD Chart 0.5.1: image v0.6.1
-* CoreDNS Chart: image  011
+* ETCD chart 0.5.1
+* CoreDNS Chart 0.7.0
 
 Also verified on ICP 
 
@@ -29,6 +28,8 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 
 #### Deploy Federation Control Plane on IBM Cloud
 
+	# To get the coredns ip
+	
 	kubectl get svc --namespace default coredns-coredns -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 
 ##### on IBM Container Service
@@ -184,8 +185,8 @@ Reference [Acmeair MicroService](https://github.com/yanglei99/acmeair-nodejs/blo
 ### Known problem
 
 
-* kubefed command may hit `unable to read certificate-authority xxx.pem for mycluster-fed due to open xxx.pem: no such file or directory`. Copy the pem to execution directory work around the issue
-* ICP `kubedef init` hit hung situation withoutu the extra settings
+* kubefed command may hit `unable to read certificate-authority xxx.pem for mycluster-1 due to open xxx.pem: no such file or directory`. Copy the pem to execution directory work around the issue
+* ICP `kubedef init` hit hung situation without the extra settings
 * Joining cluster name can not have `.` in the name. You can `kubeded join` a new cluster name, while using `--cluster-context` to point to the original context.
 * To clean up properly, you may need to issue `kubectl delete ns federation-system --context=` against all context involved in the federation
 * Investigate, ICP as Control Plane placement policy not working

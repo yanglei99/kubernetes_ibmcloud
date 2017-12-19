@@ -7,7 +7,7 @@ with the following key changes:
 
 * [coredns-provider.conf](coredns-provider.conf): use the coredns external IP.
 
-* [cm-kube-dns.yaml](cm-kube-dns.yaml): make sure each federated cluster has `kube-dns` configMap with sub-domain `example.com` and coredns external IP.
+* [cm-kube-dns.yaml](cm-kube-dns.yaml): make sure each federated cluster has `kube-dns` configMap with `stubDomains example.com` and coredns external IP.
 
 
 ### Verified 

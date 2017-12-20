@@ -1,9 +1,12 @@
 isClusterService: false
-serviceType: "LoadBalancer"
-serviceProtocol: "TCP"
+serviceType: "NodePort"
 middleware:
   kubernetes:
     enabled: false
+  errors:
+    enabled: true
+  log:
+    enabled: true
   etcd:
     enabled: true
     zones:

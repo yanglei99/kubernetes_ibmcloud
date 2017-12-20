@@ -5,19 +5,19 @@ reference [Deploying CoreDNS and etcd charts](https://kubernetes.io/docs/tasks/f
 
 With the following key changes:
 
-* [values.yaml](values.yaml): `serviceProtocol: "TCP"`
+* [values.yaml](values.yaml): `serviceType: "NodePort"`
 
 
 ### Verified 
 
 * Kubernetes: v1.8.4
-* ETCD chart 0.5.1
+* ETCD chart 0.5.1, image 0.6.1
 * CoreDNS Chart 0.7.0
 
 ### Install ETCD Chart
 
-	helm install --namespace default --name etcd-operator stable/etcd-operator
-	helm upgrade --namespace default --set cluster.enabled=true etcd-operator stable/etcd-operator
+	helm install stable/etcd-operator --name myetcd
+	helm upgrade myetcd stable/etcd-operator --set cluster.enabled=true  --set image.tag=v0.6.1
 
 #### To Test
 

@@ -5,15 +5,15 @@ reference [Kubernetes Cluster Federation](https://kubernetes.io/docs/tasks/feder
 
 with the following key changes:
 
-* [coredns-provider.conf](coredns-provider.conf): use the coredns external IP.
+* [coredns-provider.conf](coredns-provider.conf): use the coredns node public IP and port.
 
-* [cm-kube-dns.yaml](cm-kube-dns.yaml): make sure each federated cluster has `kube-dns` configMap with `stubDomains example.com` and coredns external IP.
+* [cm-kube-dns.yaml](cm-kube-dns.yaml): make sure each federated cluster has `kube-dns` configMap with `stubDomains example.com` and coredns node public IP and port
 
 
 ### Verified 
 
 * Container Service: Kubernetes 1.8.4, Federation 1.8.4
-* ETCD chart 0.5.1
+* ETCD chart 0.5.1, image 0.6.1
 * CoreDNS Chart 0.7.0
 
 Also verified on ICP 
@@ -27,10 +27,6 @@ Select one of clusters as federation host.
 reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/README.md)
 
 #### Deploy Federation Control Plane on IBM Cloud
-
-	# To get the coredns ip
-	
-	kubectl get svc --namespace default coredns-coredns -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 
 ##### on IBM Container Service
 	
@@ -71,7 +67,7 @@ Use your `host-cluster-context`. e.g. `mycluster-icp`
 	# display clusters of a federation
 	kubectl --context=fellowship get clusters
 	
-	# Optional update kube-dns ConfigMap as needed
+	# update kube-dns ConfigMap as needed and restart kube-dns
 	kubectl apply -f cm-kube-dns.yaml --context=mycluster-1
 	kubectl apply -f cm-kube-dns.yaml --context=mycluster-2
 	kubectl apply -f cm-kube-dns.yaml --context=mycluster-icp
@@ -174,7 +170,8 @@ On every federated cluster:
 		kubectl label --all nodes failure-domain.beta.kubernetes.io/region=us   --overwrite --context mycluster2
 		kubectl label --all nodes failure-domain.beta.kubernetes.io/zone=west  --overwrite --context mycluster2
 		
-		# Use the cluster NDS name
+		# Lookup cluster NDS name
+		host nginx.default.fellowship.svc.example.com
 		host nginx.default.fellowship.svc.east.us.example.com
 		host nginx.default.fellowship.svc.west.us.example.com
 
@@ -184,11 +181,9 @@ Reference [Acmeair MicroService](https://github.com/yanglei99/acmeair-nodejs/blo
 
 ### Known problem
 
-
 * kubefed command may hit `unable to read certificate-authority xxx.pem for mycluster-1 due to open xxx.pem: no such file or directory`. Copy the pem to execution directory work around the issue
+* To clean up properly, you may need to issue `kubectl delete ns federation-system --context=` against all context involved in the federation
+* CoreDNS need to use NodeType as LoadBalancer can not enable both UDP and TCP on the same service
 * ICP `kubedef init` hit hung situation without the extra settings
 * Joining cluster name can not have `.` in the name. You can `kubeded join` a new cluster name, while using `--cluster-context` to point to the original context.
-* To clean up properly, you may need to issue `kubectl delete ns federation-system --context=` against all context involved in the federation
 * Investigate, ICP as Control Plane placement policy not working
-* Investigate, cross cluster DNS name lookup not working
-

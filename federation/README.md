@@ -183,7 +183,5 @@ Reference [Acmeair MicroService](https://github.com/yanglei99/acmeair-nodejs/blo
 
 * kubefed command may hit `unable to read certificate-authority xxx.pem for mycluster-1 due to open xxx.pem: no such file or directory`. Copy the pem to execution directory work around the issue
 * To clean up properly, you may need to issue `kubectl delete ns federation-system --context=` against all context involved in the federation
-* CoreDNS need to use NodeType as LoadBalancer can not enable both UDP and TCP on the same service
-* ICP `kubedef init` hit hung situation without the extra settings
 * Joining cluster name can not have `.` in the name. You can `kubeded join` a new cluster name, while using `--cluster-context` to point to the original context.
 * Investigate, ICP as Control Plane placement policy not working

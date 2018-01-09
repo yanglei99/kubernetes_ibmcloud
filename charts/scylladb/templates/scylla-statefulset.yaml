@@ -1,0 +1,109 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name:  {{ template "scylladb.fullname" . }}
+  labels:
+    app: {{ template "scylladb.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  serviceName: {{ template "scylladb.fullname" . }}
+  replicas: {{ .Values.config.cluster_size }}
+  selector:
+    matchLabels:
+      app: {{ template "scylladb.fullname" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "scylladb.fullname" . }}
+{{- if .Values.podLabels }}
+{{ toYaml .Values.podLabels | indent 8 }}
+{{- end }}
+    spec:
+{{- if .Values.selector }}
+{{ toYaml .Values.selector | indent 6 }}
+{{- end }}
+      containers:
+      - name:  {{ template "scylladb.fullname" . }}
+        image: "{{ .Values.image.repo }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+        resources:
+{{ toYaml .Values.resources | indent 10 }}
+        env:
+        {{- $seed_size := default 1 .Values.config.seed_size | int -}}
+        {{- $global := . }}
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+        args: ["--seeds",  "{{- range $i, $e := until $seed_size }}{{ template "scylladb.fullname" $global }}-{{ $i }}.{{ template "scylladb.fullname" $global }}.{{ $global.Release.Namespace }}.svc.cluster.local,{{- end }}"]
+        ports:
+        - name: intra
+          containerPort: 7000
+        - name: tls
+          containerPort: 7001
+        - name: jmx
+          containerPort: 7199
+        - name: cql
+          containerPort: {{ default 9042 .Values.config.ports.cql }}
+        - name: thrift
+          containerPort: {{ default 9160 .Values.config.ports.thrift }}
+        securityContext:
+          capabilities:
+            add:
+              - IPC_LOCK
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "PID=$(pidof scylla) && kill $PID && while ps -p $PID > /dev/null; do sleep 1; done"]
+        readinessProbe:
+          exec:
+            command:
+              - /bin/bash
+              - -c
+              - exec
+              - /opt/ready-probe.sh
+          initialDelaySeconds: 15
+          periodSeconds: 5
+        volumeMounts:
+          - name: scylla-data
+            mountPath: /var/lib/scylla
+          - name: scylla-ready-probe
+            mountPath: /opt/ready-probe.sh
+            subPath: ready-probe.sh
+      {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+        - name: {{ .Values.image.pullSecrets }}
+      {{- end }}
+      volumes:
+        - name: scylla-ready-probe
+          configMap:
+            name: {{ template "scylladb.fullname" . }}
+{{- if not .Values.persistence.enabled }}
+        - name: scylla-data
+          emptyDir: {}
+{{- else }}
+  volumeClaimTemplates:
+  - metadata:
+      name: scylla-data
+      labels:
+        app: {{ template "scylladb.fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      accessModes:
+        - {{ .Values.persistence.accessMode | quote }}
+      resources:
+        requests:
+          storage: {{ .Values.persistence.size | quote }}
+    {{- if .Values.persistence.storageClass }}
+    {{- if (eq "-" .Values.persistence.storageClass) }}
+      storageClassName: ""
+    {{- else }}
+      storageClassName: "{{ .Values.persistence.storageClass }}"
+    {{- end }}
+    {{- end }}
+{{- end }}
+            

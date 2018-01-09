@@ -1,0 +1,13 @@
+name: scylladb
+version: 0.1.0
+description: ScyllaDB is an open-source distributed NoSQL data store. It was designed to be compatible with Apache Cassandra while achieving significantly higher throughputs and lower latencies. 
+icon: https://pbs.twimg.com/profile_images/786271812027944960/oJ22hqPY_400x400.jpg
+keywords:
+- scylladb
+- database
+- nosql
+home: http://www.scylladb.com
+maintainers:
+- name: Yang Lei
+  email: yanglei@us.ibm.com
+engine: gotpl

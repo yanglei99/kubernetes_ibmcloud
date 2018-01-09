@@ -15,3 +15,4 @@
 ## Workload on Container Service
 
 * [Spark](spark/README.md)
+* [ScyllaDB](charts/scylladb/README.md)

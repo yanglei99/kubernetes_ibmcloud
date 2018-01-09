@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "scylladb.fullname" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+  name: {{ template "scylladb.fullname" . }}
+spec:
+{{- if contains "ClusterIP" .Values.service.type }}
+  clusterIP: None
+{{- end }}  
+  type: {{ .Values.service.type }}
+  ports:
+  - name: intra
+    port: 7000
+    targetPort: 7000
+  - name: tls
+    port: 7001
+    targetPort: 7001
+  - name: jmx
+    port: 7199
+    targetPort: 7199
+  - name: cql
+    port: {{ default 9042 .Values.config.ports.cql }}
+    targetPort: {{ default 9042 .Values.config.ports.cql }}
+  - name: thrift
+    port: {{ default 9160 .Values.config.ports.thrift }}
+    targetPort: {{ default 9160 .Values.config.ports.thrift }}
+  selector:
+    app: {{ template "scylladb.fullname" . }}

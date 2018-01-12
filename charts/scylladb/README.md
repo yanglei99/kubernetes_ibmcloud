@@ -121,20 +121,26 @@ UN  172.30.58.71  838.88 KB  256          66.9%             78c8ec63-298e-430e-9
 UN  172.30.252.4  1.05 MB    256          66.4%             821265e5-c795-4968-84a1-255b1b8512d4  rack1
 ```
 
+## Connect using cqlsh
+
+```bash
+kubectl exec -it --namespace scylladb  $(kubectl get pods --namespace scylladb -l app=scylladb-scylladb -o jsonpath='{.items[0].metadata.name}') cqlsh
+```
 
 ## Benchmark
 
 You can use [cassandra-stress](https://docs.datastax.com/en/cassandra/3.0/cassandra/tools/toolsCStress.html) tool to run the benchmark on the cluster by the following command
 
 ```bash
-kubectl exec -it --namespace scylladb $(kubectl get pods --namespace scylladb -l app=scylladb-scylladb -o jsonpath='{.items[0].metadata.name}') cassandra-stress write n=10000
 
-kubectl exec -it --namespace scylladb $(kubectl get pods --namespace scylladb -l app=scylladb-scylladb -o jsonpath='{.items[0].metadata.name}') cassandra-stress read n=1000
+kubectl exec -it --namespace scylladb $(kubectl get pods --namespace scylladb -l app=scylladb-scylladb -o jsonpath='{.items[0].metadata.name}') -- cassandra-stress write n=10000 -node scylladb-scylladb-1.scylladb-scylladb.scylladb.svc.cluster.local
+
+kubectl exec -it --namespace scylladb $(kubectl get pods --namespace scylladb -l app=scylladb-scylladb -o jsonpath='{.items[0].metadata.name}') -- cassandra-stress read n=1000 -node scylladb-scylladb-1.scylladb-scylladb.scylladb.svc.cluster.local
 ```
 
 
 ### Known Issue
 
-* Only ClusterIP service type works as seed uses pod DNS name that is only available for headless service. While [NodePort and LoadBalancer do not support headless service](https://github.com/kubernetes/kubernetes/pull/30932)
-* ScyllaDB instance in POD listens to `POD_IP`. This makes `port-forward` and `exec ... cassandra-stress` not working. You can work around cassandra-stress issueby executing  from the pod exec terminal and `-node $POD_IP.`
+* Only ClusterIP service type works as seed depends on pod DNS name which is only available for headless service. While [NodePort and LoadBalancer do not support headless service](https://github.com/kubernetes/kubernetes/pull/30932)
+* ScyllaDB instance in POD listens to `POD_IP`. So `port-forward` does not work. For cassandra-stress, use `-node scylladb-scylladb-0.scylladb-scylladb.scylladb.svc.cluster.local` to work around the issue, or you can get the `POD_IP` and use it directly
 

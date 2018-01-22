@@ -12,13 +12,16 @@ with the following key changes:
 
 ### Verified 
 
-* Container Service: Kubernetes 1.8.4, Federation 1.8.4
+* Container Service: Kubernetes 1.8.4
+* ICP 2.1.0 : Kubernetes 1.8.3 
+* Kubefed: 1.8.4
 * ETCD chart 0.5.1, image 0.6.1
 * CoreDNS Chart 0.7.0
 
-Also verified on ICP 
 
 ### Deploy Federation with CoreDNS as DNS provider
+
+You can create [ICP Cluster with federation directly](https://github.com/yanglei99/terraform_ibmcloud/tree/master/icp). 
 
 #### Deploy CoreDNS with etcd
 
@@ -26,7 +29,7 @@ Select one of clusters as federation host.
 
 reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/README.md)
 
-#### Deploy Federation Control Plane on IBM Cloud
+#### Deploy Federation Control Plane
 
 ##### on IBM Container Service
 	
@@ -41,7 +44,7 @@ reference [Deploying CoreDNS and etcd charts on IBM Cloud](../charts/coredns/REA
 
 	# when you have the cluster config yml. e.g. downloaded from IBM Container Service Cluster
 	
-	export KUBECONFIG=~/.bluemix/plugins/container-service/clusters/mycluster-1/xxx-mycluster-1.yml:~/.bluemix/plugins/container-service/clusters/mycluster-1/xxx-mycluster-1.yml:~/.kube/config
+	export KUBECONFIG=~/.bluemix/plugins/container-service/clusters/mycluster-1/xxx-mycluster-1.yml:~/.bluemix/plugins/container-service/clusters/mycluster-1/xxx-mycluster-1.yml:kubeconfig
 	
 	# for ICP Cluster, if you manually create the cluster context from `Configure Client`, the current context's config file will be updated. e.g.
 	kubectl config set-cluster mycluster-icp --server=https://ICP_HOST:PORT --insecure-skip-tls-verify=true
@@ -128,7 +131,6 @@ Use [test-federation.sh](test-federation.sh) to list pods and services from each
 	kubectl --context=fellowship create namespace kube-federation-scheduling-policy
 	kubectl --context=fellowship -n kube-federation-scheduling-policy create configmap scheduling-policy --from-file=policy.rego
 
-Note: you can revise `use-context` to your host cluster context, e.g. `mycluster-icp`
 
 ##### Test the placement policy
 
@@ -184,4 +186,4 @@ Reference [Acmeair MicroService](https://github.com/yanglei99/acmeair-nodejs/blo
 * kubefed command may hit `unable to read certificate-authority xxx.pem for mycluster-1 due to open xxx.pem: no such file or directory`. Copy the pem to execution directory work around the issue
 * To clean up properly, you may need to issue `kubectl delete ns federation-system --context=` against all context involved in the federation
 * Joining cluster name can not have `.` in the name. You can `kubeded join` a new cluster name, while using `--cluster-context` to point to the original context.
-* Investigate, ICP as Control Plane placement policy not working
+* ICP Service Discovery does not work

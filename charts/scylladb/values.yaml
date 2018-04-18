@@ -49,6 +49,9 @@ config:
   ports:
     cql: 9042
     thrift: 9160
+  scylladb:
+    overprovisioned: 1
+    developermode: 1
 
 ## Configure node selector. Edit code below for adding selector to pods
 ## ref: https://kubernetes.io/docs/user-guide/node-selection/

@@ -37,7 +37,13 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: status.podIP
-        args: ["--seeds",  "{{- range $i, $e := until $seed_size }}{{ template "scylladb.fullname" $global }}-{{ $i }}.{{ template "scylladb.fullname" $global }}.{{ $global.Release.Namespace }}.svc.cluster.local,{{- end }}"]
+        args:
+        - "--seeds"
+        - "{{- range $i, $e := until $seed_size }}{{ template "scylladb.fullname" $global }}-{{ $i }}.{{ template "scylladb.fullname" $global }}.{{ $global.Release.Namespace }}.svc.cluster.local,{{- end }}"
+        - "--overprovisioned"
+        - "{{ .Values.config.scylladb.overprovisioned }}"
+        - "--developer-mode"
+        - "{{ .Values.config.scylladb.developermode }}"
         ports:
         - name: intra
           containerPort: 7000

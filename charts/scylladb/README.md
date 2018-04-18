@@ -143,4 +143,4 @@ kubectl exec -it --namespace scylladb $(kubectl get pods --namespace scylladb -l
 
 * Only ClusterIP service type works as seed depends on pod DNS name which is only available for headless service. While [NodePort and LoadBalancer do not support headless service](https://github.com/kubernetes/kubernetes/pull/30932)
 * ScyllaDB instance in POD listens to `POD_IP`. So `port-forward` does not work. For cassandra-stress, use `-node scylladb-scylladb-0.scylladb-scylladb.scylladb.svc.cluster.local` to work around the issue, or you can get the `POD_IP` and use it directly
-
+* When "developermode=0", pod may crash

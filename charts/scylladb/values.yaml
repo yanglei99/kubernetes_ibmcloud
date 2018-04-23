@@ -2,7 +2,7 @@
 ## ref: https://hub.docker.com/r/library/cassandra/
 image:
   repo: "scylladb/scylla"
-  tag: "2.1.1"
+  tag: "2.1.2"
   pullPolicy: IfNotPresent
   ## Specify ImagePullSecrets for Pods
   ## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
@@ -13,7 +13,7 @@ image:
 service:
   type: ClusterIP
 
-## Persist data to a persitent volume
+## Persist data to a persistent volume
 persistence:
   enabled: true
   ## Scylladb data Persistent Volume Storage Class
@@ -24,8 +24,11 @@ persistence:
   ##   GKE, AWS & OpenStack)
   ##
   storageClass: "default"
+  pvcName : "scylla-data"
+  #storageClass: "ibmc-block-gold-xfs"
+  #pvcName : "scylla-data-xfs"
   accessMode: ReadWriteOnce
-  size: 10Gi
+  size: 20Gi
 
 ## Configure resource requests and limits
 ## ref: http://kubernetes.io/docs/user-guide/compute-resources/

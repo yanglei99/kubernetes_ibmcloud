@@ -73,7 +73,7 @@ spec:
           initialDelaySeconds: 15
           periodSeconds: 5
         volumeMounts:
-          - name: scylla-data
+          - name: {{ .Values.persistence.pvcName }}
             mountPath: /var/lib/scylla
           - name: scylla-ready-probe
             mountPath: /opt/ready-probe.sh
@@ -87,12 +87,12 @@ spec:
           configMap:
             name: {{ template "scylladb.fullname" . }}
 {{- if not .Values.persistence.enabled }}
-        - name: scylla-data
+        - name: {{ .Values.persistence.pvcName }}
           emptyDir: {}
 {{- else }}
   volumeClaimTemplates:
   - metadata:
-      name: scylla-data
+      name: {{ .Values.persistence.pvcName }}
       labels:
         app: {{ template "scylladb.fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"

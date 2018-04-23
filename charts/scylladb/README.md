@@ -28,10 +28,30 @@ Some platforms, like IBM Container Service, have predefine StorageClass.
 To list current storageclass, run the following
 
 ```bash
-kubectl get storageclasses
+kubectl get storageClasses
 ```
 
-To create a `StorageClass` on Google Cloud, run the following
+### To create XFS enabled `storageClass` on IBM Cloud
+
+```bash
+
+helm repo add ibm  https://registry.bluemix.net/helm/ibm
+helm install ibm/ibmcloud-block-storage-plugin
+
+kubectl apply -f sample/create-storage-xfs-ibmcloud.yaml
+
+Then set the following values in `values.yaml`
+
+```yaml
+persistence:
+  enabled: true
+  storageClass: "ibmc-block-gold-xfs"
+  pvcName : "scylla-data-xfs"
+```
+
+
+
+### To create a `StorageClass` on Google Cloud, run the following
 
 ```bash
 kubectl create -f sample/create-storage-gce.yaml
@@ -143,4 +163,4 @@ kubectl exec -it --namespace scylladb $(kubectl get pods --namespace scylladb -l
 
 * Only ClusterIP service type works as seed depends on pod DNS name which is only available for headless service. While [NodePort and LoadBalancer do not support headless service](https://github.com/kubernetes/kubernetes/pull/30932)
 * ScyllaDB instance in POD listens to `POD_IP`. So `port-forward` does not work. For cassandra-stress, use `-node scylladb-scylladb-0.scylladb-scylladb.scylladb.svc.cluster.local` to work around the issue, or you can get the `POD_IP` and use it directly
-* When "developermode=0", pod may crash
+* When "developermode=0", pod crash due to directory not exists

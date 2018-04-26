@@ -1,0 +1,52 @@
+alertmanager:
+  extraArgs:
+    log.level: debug
+  ingress:
+    enabled: false
+  persistentVolume:
+    ## Prometheus is not used for long term storage
+    enabled: false
+server:
+  ingress:
+    enabled: false
+  persistentVolume:
+    enabled: false
+
+scrape_configs:
+  - job_name: 'mysql global status'
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+        - 'mysql-exporter:9104'
+    params:
+      collect[]:
+        - global_status
+
+  - job_name: 'mysql performance'
+    scrape_interval: 1m
+    static_configs:
+      - targets:
+        - 'mysql-exporter:9104'
+    params:
+      collect[]:
+        - perf_schema.tableiowaits
+        - perf_schema.indexiowaits
+        - perf_schema.tablelocks
+
+  - job_name: 'kafka jmx exporter'
+    scrape_interval: 15s
+    static_configs:
+      - targets:
+        - 'jmx-exporter:5556'
+    params:
+      collect[]:
+        - global_status
+
+  - job_name: 'kfaka exporter'
+    scrape_interval: 1m
+    static_configs:
+      - targets:
+        - 'kafka-exporter:9308'
+    params:
+      collect[]:
+        - global_status

@@ -5,7 +5,7 @@ reference [Zookeeper chart](https://github.com/kubernetes/charts/tree/master/inc
 
 With the following [changes](values.yaml)
 
-* [option] revise `storageClass` to what `kubectl get storageclasses` returns, e.g. `ibmc-file-bronze` is `default`
+* [option] revise `storageClass` to what `kubectl get storageclasses` returns, e.g. `default`
 * [Option] you can also pre-create the persistenceVolumeClaim, after changing `name` in the [script](../ibm-pvc.yaml).
 
 

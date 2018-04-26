@@ -1,4 +1,5 @@
 dependencies:
 - name: zookeeper
-  version: 0.4.2
-  repository: http://storage.googleapis.com/kubernetes-charts-incubator/
+  version: 0.5.0
+  repository: https://kubernetes-charts-incubator.storage.googleapis.com/
+  condition: zookeeper.enabled
